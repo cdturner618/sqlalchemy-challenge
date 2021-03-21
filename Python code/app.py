@@ -67,7 +67,7 @@ def temps():
     session = Session(engine)
 
 
-# Query All stations
+# Query All temp
     import datetime as dt
     query_date = dt.date(2017, 8, 23) - dt.timedelta(days=365)
 
@@ -100,7 +100,7 @@ def precip():
 
     session.close()
 
-    # Create a dictionary from the row data and append to a list of all_passengers
+    # Create a dictionary from the row data and append to a list of all_dates
     all_dates = []
     for date, prcp, in all_prcp:
         date_dict = {}
