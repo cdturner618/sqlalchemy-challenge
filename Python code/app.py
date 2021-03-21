@@ -42,6 +42,8 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/<start><br/>"
+        f"/api/v1.0/<start>/<end>"
     )
 
 
@@ -64,7 +66,7 @@ def stations():
 @app.route("/api/v1.0/tobs")
 def temps():
     # Create our session (link) from Python to the DB
-    session = Session(engine)
+    session2 = Session(engine)
 
 
 # Query All temp
@@ -77,7 +79,7 @@ def temps():
     all_temps = session.query(*sel1).filter((Measurements.date) >=
                                             query_date).filter(Measurements.station == 'USC00519281').all()
 
-    session.close()
+    session2.close()
 
     Temp_list = list(np.ravel(all_temps))
 
@@ -87,7 +89,7 @@ def temps():
 @app.route("/api/v1.0/precipitation")
 def precip():
     # Create our session (link) from Python to the DB
-    session = Session(engine)
+    session3 = Session(engine)
 
 
 # Query All Prcp
@@ -98,7 +100,7 @@ def precip():
     all_prcp = session.query(
         *sel2).filter(Measurements.date).filter(Measurements.prcp).all()
 
-    session.close()
+    session3.close()
 
     # Create a dictionary from the row data and append to a list of all_dates
     all_dates = []
@@ -109,6 +111,31 @@ def precip():
         all_dates.append(date_dict)
 
     return jsonify(all_dates)
+
+
+@app.route("/api/v1.0/<date>")
+def temp_range(date):
+    # Create our session (link) from Python to the DB
+    session4 = Session(engine)
+
+# Query All start dates
+
+    sel3 = [Measurements.date,
+            func.min(Measurements.tobs),
+            func.avg(Measurements.tobs),
+            func.max(Measurements.tobs)]
+    start_date = session4.query(
+        *sel3).filter(Measurements.date).group_by(date).all()
+
+    session4.close()
+
+    for day in start_date:
+        specific_days = day("date")
+        if date == specific_days:
+            return jsonify(day)
+
+    return jsonify(f"{date} not found"), 404
+    # return jsonify(start_date)
 
 
 if __name__ == '__main__':
