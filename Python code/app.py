@@ -76,8 +76,8 @@ def temps():
     sel1 = [
         Measurements.date,
         Measurements.tobs]
-    all_temps = session.query(*sel1).filter((Measurements.date) >=
-                                            query_date).filter(Measurements.station == 'USC00519281').all()
+    all_temps = session2.query(*sel1).filter((Measurements.date) >=
+                                             query_date).filter(Measurements.station == 'USC00519281').all()
 
     session2.close()
 
@@ -97,7 +97,7 @@ def precip():
     sel2 = [
         Measurements.date,
         Measurements.prcp]
-    all_prcp = session.query(
+    all_prcp = session3.query(
         *sel2).filter(Measurements.date).filter(Measurements.prcp).all()
 
     session3.close()
@@ -125,17 +125,42 @@ def temp_range(date):
             func.avg(Measurements.tobs),
             func.max(Measurements.tobs)]
     start_date = session4.query(
-        *sel3).filter(Measurements.date).group_by(date).all()
+        *sel3).filter(Measurements.date).group_by(Measurements.date).all()
 
     session4.close()
-
+    canonicalized = date.replace(" ", " ", " ")
     for day in start_date:
-        specific_days = day("date")
-        if date == specific_days:
-            return jsonify(day)
+        search_term = day["date"].replace(" ", " ", " ")
+        if search_term == canonicalized:
+            return jsonify(date)
 
     return jsonify(f"{date} not found"), 404
     # return jsonify(start_date)
+
+
+# @app.route("/api/v1.0/<start/end>")
+# def temp_range(date):
+#     # Create our session (link) from Python to the DB
+#     session4 = Session(engine)
+
+# # Query All start dates
+
+#     sel3 = [Measurements.date,
+#             func.min(Measurements.tobs),
+#             func.avg(Measurements.tobs),
+#             func.max(Measurements.tobs)]
+#     start_date = session4.query(
+#         *sel3).filter(Measurements.date).group_by(Measurements.date).all()
+
+#     session4.close()
+
+#     for day in start_date:
+#         specific_days = day("date")
+#         if date == specific_days:
+#             return jsonify(day)
+
+#     return jsonify(f"{date} not found"), 404
+#     # return jsonify(start_date)
 
 
 if __name__ == '__main__':
