@@ -117,50 +117,50 @@ def precip():
 def temp_range(date):
     # Create our session (link) from Python to the DB
     session4 = Session(engine)
-
 # Query All start dates
-
     sel3 = [Measurements.date,
             func.min(Measurements.tobs),
             func.avg(Measurements.tobs),
             func.max(Measurements.tobs)]
     start_date = session4.query(
         *sel3).filter(Measurements.date).group_by(Measurements.date).all()
-
     session4.close()
-    canonicalized = date.replace(" ", " ", " ")
     for day in start_date:
-        search_term = day["date"].replace(" ", " ", " ")
-        if search_term == canonicalized:
-            return jsonify(date)
-
+        if day[0] == date:
+            return jsonify(
+                {
+                    "date": day[0],
+                    "min": day[1],
+                    "avg": day[2],
+                    "max": day[3]
+                }
+            )
     return jsonify(f"{date} not found"), 404
-    # return jsonify(start_date)
 
 
-# @app.route("/api/v1.0/<start/end>")
-# def temp_range(date):
-#     # Create our session (link) from Python to the DB
-#     session4 = Session(engine)
-
-# # Query All start dates
-
-#     sel3 = [Measurements.date,
-#             func.min(Measurements.tobs),
-#             func.avg(Measurements.tobs),
-#             func.max(Measurements.tobs)]
-#     start_date = session4.query(
-#         *sel3).filter(Measurements.date).group_by(Measurements.date).all()
-
-#     session4.close()
-
-#     for day in start_date:
-#         specific_days = day("date")
-#         if date == specific_days:
-#             return jsonify(day)
-
-#     return jsonify(f"{date} not found"), 404
-#     # return jsonify(start_date)
+@app.route("/api/v1.0/<startdate>/<enddate>")
+def temp_ranges(dates):
+    # Create our session (link) from Python to the DB
+    session5 = Session(engine)
+# Query All start dates
+    sel4 = [Measurements.date,
+            func.min(Measurements.tobs),
+            func.avg(Measurements.tobs),
+            func.max(Measurements.tobs)]
+    start_dates = session5.query(
+        *sel4).filter(Measurements.date).group_by(Measurements.date).all()
+    session5.close()
+    for days in start_dates:
+        if days[0] == dates:
+            return jsonify(
+                {
+                    "date": days[0],
+                    "min": days[1],
+                    "avg": days[2],
+                    "max": days[3]
+                }
+            )
+    return jsonify(f"{dates} not found"), 404
 
 
 if __name__ == '__main__':
